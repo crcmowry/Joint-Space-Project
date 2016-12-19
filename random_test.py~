@@ -4,7 +4,7 @@ from time import gmtime, strftime
 f = open("random_test_output.txt", "a")
 
 maxAngle = 420
-minAngle = 60
+minAngle = 69
 
 
 f.write("%s\n" % strftime("%a, %d %b %Y %H:%M:%S", gmtime()))
