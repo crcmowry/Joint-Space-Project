@@ -5,12 +5,6 @@ from math import sqrt
 f = open("random_test_output.txt", "w")
 f.write("%s\n" % strftime("%a, %d %b %Y %H:%M:%S", gmtime()))
 
-<<<<<<< HEAD
-=======
-maxAngle = 420
-minAngle = 60
->>>>>>> 10287180246ccfb8c1c795943e0b2aea6c1aeb44
-
 iterations = input("How much data? ")
 min_x = input("min x value: ")
 max_x = input("max x value: ")
