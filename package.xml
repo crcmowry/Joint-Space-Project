@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>Joint-Space-Project</name>
+  <version>0.0.0</version>
+  <description>
+    Scripts used to collect joint data.
+    Developed by the Connor Mowry and Vikram Bhat at Carnegie Mellon University.
+  </description>
+  <!--Add in repo once its set up-->
+  <url type="repository">https://github.com/crcmowry/Joint-Space-Project</url>
+  <maintainer email="crcmowry@gmail.com">Connor Mowry</maintainer>
+  <author email="crcmowry@gmail.com">Connor Mowry (in collaboration with Vikram Bhat)</author>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>python</build_depend>
+  <run_depend>prpy</run_depend>
+  <run_depend>python</run_depend>
+  <run_depend>python-numpy</run_depend>
+  <run_depend>python-yaml</run_depend>
+</package>
