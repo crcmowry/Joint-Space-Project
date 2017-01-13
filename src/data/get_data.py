@@ -16,43 +16,35 @@ DOF_values.write("%s\n\n" % strftime("%a, %d %b %Y %H:%M:%S", gmtime()))
 
 iterations = input("How much data? ")
 
+
+
 env, robot = herbpy.initialize(sim = True)
 robot.right_arm.SetActive()
-
-
 limits = robot.GetActiveDOFLimits()
 
+pos = robot.right_arm.GetEndEffectorTransform() 												# This should be the starting position of the end effector.
+old_dof_values = robot.right_arm.GetDOFValues() 												# The DOF values at the starting position. Possibly all 0s.
 
-
-
-# TODO: Implement pos to be the starting
-# 		position of the end effector.
-#			AND
-#		Make old_dof_values the DOF values
-#		at the starting position
-pos = robot.right_arm.GetEndEffectorTransform() 																			# This should be the starting position of the end effector.
-old_dof_values = robot.right_arm.GetDOFValues() 														# The DOF values at the starting position. Possibly all 0s.
 
 x_y_z_position.write("{0}\n".format(pos))
 DOF_values.write("{0}\n".format(old_dof_values))
+
+
+
 
 def random_dof_values(lowerBound, upperBound):
 	return random() * (upperBound - lowerBound) + lowerBound
 
 
+
+
+
 for i in range(0,iterations):
-	new_dof_values = [random_dof_values(limits[1[j]],limits[2[j]]) for j in range(0,7)]		# Generates the new random position within the range of the min and max
-
-	# TODO: Move the robot from old_dof_values to new_dof_values
-	#
-	#
-	#
-	#
-	#
-	#
+	new_dof_values = [random_dof_values(limits[1[j]],limits[2[j]]) for j in range(0,7)]			# Generates the new random position within the range of the min and max
+	
+	robot.right_arm.SetDOFValues(new_dof_values)
 
 
-	# TODO: Make this the pos (task space) after the robot moves
 	pos = robot.right_arm.GetEndEffectorTransform() 											# Gets the pos at the new_dof_values.
 
 	x_y_z_position.write("{0}\n".format(pos))
