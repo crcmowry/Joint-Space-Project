@@ -1,6 +1,7 @@
 from random import random
 from time import gmtime, strftime
 from math import sqrt
+import herbpy
 
 DOF_values = open("DOF_values.txt", "w")														# r: read, w: write, a: append
 x_y_z_position = open("x_y_z_position.txt", "w")
@@ -15,38 +16,34 @@ DOF_values.write("%s\n\n" % strftime("%a, %d %b %Y %H:%M:%S", gmtime()))
 
 iterations = input("How much data? ")
 
-# The following makes a cube that represents
-# the task space of the robot. In reality,
-# this won't be realistic because the joints
-# will sweep in a fixed radius and cut out a
-# semisphical shape.
-min_x = input("min x value: ")
-max_x = input("max x value: ")
-min_y = input("min y value: ")
-max_y = input("max y value: ")
-min_z = input("min z value: ")
-max_z = input("max z value: ")
+env, robot = herbpy.initialize(sim = True)
+robot.right_arm.SetActive()
 
 
-# TODO: Implement old_pos to be the starting
+limits = robot.GetActiveDOFLimits()
+
+
+
+
+# TODO: Implement pos to be the starting
 # 		position of the end effector.
 #			AND
-#		Make dof_values the DOF values
+#		Make old_dof_values the DOF values
 #		at the starting position
-old_pos = [(min_x + max_x) / 2,(min_y + max_y) / 2,(min_z + max_z) / 2] 						# This should be the starting position of the end effector.
-dof_values = [0 for j in range(0,7)] 															# The DOF values at the starting position. Possibly all 0s.
+pos = robot.right_arm.GetEndEffectorTransform() 																			# This should be the starting position of the end effector.
+old_dof_values = robot.right_arm.GetDOFValues() 														# The DOF values at the starting position. Possibly all 0s.
 
-x_y_z_position.write("{0}\n".format(old_pos))
-DOF_values.write("{0}\n".format(dof_values))
+x_y_z_position.write("{0}\n".format(pos))
+DOF_values.write("{0}\n".format(old_dof_values))
 
-def randomPos(lowerBound, upperBound):
+def random_dof_values(lowerBound, upperBound):
 	return random() * (upperBound - lowerBound) + lowerBound
 
 
 for i in range(0,iterations):
-	new_pos = [randomPos(min_x, max_x), randomPos(min_y, max_y), randomPos(min_z, max_z)]		# Generates the new random position within the range of the min and max
+	new_dof_values = [random_dof_values(limits[1[j]],limits[2[j]]) for j in range(0,7)]		# Generates the new random position within the range of the min and max
 
-	# TODO: Move the end effector from old_pos to new_pos
+	# TODO: Move the robot from old_dof_values to new_dof_values
 	#
 	#
 	#
@@ -55,14 +52,13 @@ for i in range(0,iterations):
 	#
 
 
-	# TODO: Make dof_values the DOF values after the
-	#		end effector moves from old_pos to new_pos.
-	dof_values = [random() * 360 for j in range(0,7)] 											# Gets the DOF values at the new_pos.
+	# TODO: Make this the pos (task space) after the robot moves
+	pos = robot.right_arm.GetEndEffectorTransform() 											# Gets the pos at the new_dof_values.
 
-	x_y_z_position.write("{0}\n".format(new_pos))
-	DOF_values.write("{0}\n".format(dof_values))
+	x_y_z_position.write("{0}\n".format(pos))
+	DOF_values.write("{0}\n".format(new_dof_values))
 
-	old_pos = new_pos
+	old_dof_values = new_dof_values
 
 
 x_y_z_position.write("\n")
