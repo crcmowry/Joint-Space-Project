@@ -3,8 +3,8 @@ from time import gmtime, strftime
 from math import sqrt
 import herbpy
 
-DOF_values = open("DOF_values.txt", "a")														# r: read, w: write, a: append
-x_y_z_position = open("x_y_z_position.txt", "a")
+DOF_values = open("DOF_values.txt", "w")														# r: read, w: write, a: append
+x_y_z_position = open("x_y_z_position.txt", "w")
 
 # Makes a time stamp at the top of each document.
 # This is really only useful for when they
