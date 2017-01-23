@@ -3,8 +3,8 @@ from time import gmtime, strftime
 from math import sqrt
 import herbpy
 
-DOF_values = open("DOF_values.txt", "w")														# r: read, w: write, a: append
-x_y_z_position = open("x_y_z_position.txt", "w")
+DOF_values = open("DOF_values.txt", "a")														# r: read, w: write, a: append
+x_y_z_position = open("x_y_z_position.txt", "a")
 
 # Makes a time stamp at the top of each document.
 # This is really only useful for when they
@@ -38,9 +38,8 @@ def random_dof_values(lowerBound, upperBound):
 
 
 
-
 for i in range(0,iterations):
-	new_dof_values = [random_dof_values(limits[1[j]],limits[2[j]]) for j in range(0,7)]			# Generates the new random position within the range of the min and max
+	new_dof_values = [random_dof_values(limits[0][j],limits[1][j]) for j in range(0,7)]			# Generates the new random position within the range of the min and max
 	
 	robot.right_arm.SetDOFValues(new_dof_values)
 
