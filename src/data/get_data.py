@@ -2,57 +2,39 @@ from random import random
 from time import gmtime, strftime
 from math import sqrt
 import herbpy
+import yaml
 
-DOF_values = open("DOF_values.txt", "w")														# r: read, w: write, a: append
-x_y_z_position = open("x_y_z_position.txt", "w")
-
-# Makes a time stamp at the top of each document.
-# This is really only useful for when they
-# (the documents) are being appended to instead
-# of written to.
-x_y_z_position.write("%s\n\n" % strftime("%a, %d %b %Y %H:%M:%S", gmtime()))
-DOF_values.write("%s\n\n" % strftime("%a, %d %b %Y %H:%M:%S", gmtime()))
-
+def random_dof_values(lowerBound, upperBound):
+		return random() * (upperBound - lowerBound) + lowerBound
 
 iterations = input("How much data? ")
 
 
-
 env, robot = herbpy.initialize(sim = True)
 robot.right_arm.SetActive()
-limits = robot.GetActiveDOFLimits()
-
-pos = robot.right_arm.GetEndEffectorTransform() 												# This should be the starting position of the end effector.
-old_dof_values = robot.right_arm.GetDOFValues() 												# The DOF values at the starting position. Possibly all 0s.
 
 
-x_y_z_position.write("{0}\n".format(pos))
-DOF_values.write("{0}\n".format(old_dof_values))
+limits = list(robot.GetActiveDOFLimits())
+pos = robot.right_arm.GetEndEffectorTransform().tolist() 												# This should be the starting position of the end effector.
+old_dof_values = robot.right_arm.GetDOFValues().tolist() 												# The DOF values at the starting position. Possibly all 0s.
 
+for i in range(len(limits)):
+	limits[i] = limits[i].tolist()
 
+data = {"DOF_limits": limits, "DOFs": [old_dof_values], "Transforms": [pos]}
 
-
-def random_dof_values(lowerBound, upperBound):
-	return random() * (upperBound - lowerBound) + lowerBound
-
-
-
-
-for i in range(0,iterations):
-	new_dof_values = [random_dof_values(limits[0][j],limits[1][j]) for j in range(0,7)]			# Generates the new random position within the range of the min and max
+for i in range(iterations):
+	new_dof_values = [random_dof_values(limits[0][j],limits[1][j]) for j in range(7)]			# Generates the new random position within the range of the min and max
 	
 	robot.right_arm.SetDOFValues(new_dof_values)
 
+	pos = robot.right_arm.GetEndEffectorTransform().tolist()												# Gets the pos at the new_dof_values.
 
-	pos = robot.right_arm.GetEndEffectorTransform() 											# Gets the pos at the new_dof_values.
-
-	x_y_z_position.write("{0}\n".format(pos))
-	DOF_values.write("{0}\n".format(new_dof_values))
+	data["DOFs"].append(new_dof_values)
+	data["Transforms"].append(pos)
 
 	old_dof_values = new_dof_values
 
 
-x_y_z_position.write("\n")
-DOF_values.write("\n")
-x_y_z_position.close()
-DOF_values.close()
+with file('data.yaml', 'w') as stream:
+	yaml.dump(data, stream)

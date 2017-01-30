@@ -1,29 +1,30 @@
-import herbpy
+import ast
+import yaml
 
+num_of_bins = int(input("How many bins? "))
+joint_index = int(input("Which joint? ")) - 1
+def f(x):
+    return {
+    	'x': 0,
+        'y': 1,
+        'z': 2,
+    }[x]
+dimension = f(input("x, y, or z? (enter in lowercase) "))
 
+stream = file('data.yaml', 'r')    # 'document.yaml' contains a single YAML document.
+data = yaml.load(stream)
 
-DOF_values = open("DOF_values.txt", "r")														# r: read, w: write, a: append
-x_y_z_position = open("x_y_z_position.txt", "r")
+min_DOF_value = data["DOF_limits"][0][joint_index]
+max_DOF_value = data["DOF_limits"][1][joint_index]
 
-num_of_bins = input("How many bins? ")
-joint_index = input("Which joint? ") - 1
-dimension = input("x, y, or z? (enter in lowercase) ")
-
-
-env, robot = herbpy.initialize(sim = True)
-robot.right_arm.SetActive()
-limits = robot.GetActiveDOFLimits()
-
-min_DOF_value = limits[0][joint_index]
-max_DOF_value = limits[1][joint_index]
 increment = (max_DOF_value - min_DOF_value) / num_of_bins
-ranges = [increment*(i+1) + min_DOF_value for i in range(0, num_of_bins)]
-value = [0 for i in range(0,num_of_bins)]
-count = [0 for i in range(0,num_of_bins)]
+ranges = [increment*(i+1) + min_DOF_value for i in range(num_of_bins)]
+value = [0 for i in range(num_of_bins)]
+count = [0 for i in range(num_of_bins)]
 
 
 
-def binarySearch(alist, item):
+def modifiedBinarySearch(alist, item):
     first = 0
     last = len(alist)-1
     found = False
@@ -36,27 +37,30 @@ def binarySearch(alist, item):
             if item < alist[midpoint]:
                 last = midpoint-1
             else:
-                first = midpoint+1
+	            first = midpoint+1
 
-    return midpoint
-
-
+	return midpoint
 
 
-for line in DOF_values:
-	split_line = line.split(",")
-	print split_line
-	if line != '' and line[0] == '[' and line[1] != ' ':
-		#joint = float(line[1:line.index(",")])
-		joint = float(split_line[joint_index])
-		index = binarySearch(ranges, joint)
-		value[index] += joint 																	#3d position
-		count[index] += 1
+i = 0
+for DOFs in data["DOFs"]:
+	joint_value = DOFs[joint_index]
+	bin_index = modifiedBinarySearch(ranges, joint_value)
+	value[bin_index] += data["Transforms"][i][dimension][3]
+	count[bin_index] += 1
+	i += 1
 
-for i in range(0, num_of_bins):
+
+average_value = list()
+for i in range(num_of_bins):
 	if count[i] != 0:
-		value[i] /= count[i]
+		average_value.append(value[i] / count[i])
 
-print value
-print count
-print ranges
+
+
+with open("extracted_data.txt", "w") as data_file:
+	for data in average_value:
+		data_file.write("{0}\n".format(data))
+	data_file.write("\n")
+	for data in ranges:
+		data_file.write("{0}\n".format(data))
