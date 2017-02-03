@@ -4,8 +4,10 @@ from math import sqrt
 import herbpy
 import yaml
 
+
 def random_dof_values(lowerBound, upperBound):
 		return random() * (upperBound - lowerBound) + lowerBound
+
 
 iterations = input("How much data? ")
 

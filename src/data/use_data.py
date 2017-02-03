@@ -25,19 +25,19 @@ count = [0 for i in range(num_of_bins)]
 
 
 def modifiedBinarySearch(alist, item):
-    first = 0
-    last = len(alist)-1
-    found = False
+	first = 0
+	last = len(alist)-1
+	found = False
 
-    while first<=last and not found:
-        midpoint = (first + last)//2
-        if alist[midpoint] >= item and alist[midpoint]-increment <= item:
-            found = True
-        else:
-            if item < alist[midpoint]:
-                last = midpoint-1
-            else:
-	            first = midpoint+1
+	while first<=last and not found:
+		midpoint = (first + last)//2
+		if alist[midpoint] >= item and alist[midpoint]-increment <= item:
+			found = True
+		else:
+			if item < alist[midpoint]:
+				last = midpoint-1
+			else:
+				first = midpoint+1
 
 	return midpoint
 
@@ -55,7 +55,6 @@ average_value = list()
 for i in range(num_of_bins):
 	if count[i] != 0:
 		average_value.append(value[i] / count[i])
-
 
 
 with open("extracted_data.txt", "w") as data_file:
