@@ -1,9 +1,11 @@
-import ast
 import yaml
 from yaml import CLoader as Loader, CDumper as Dumper
+
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 
 def modifiedBinarySearch(alist, item):
 	first = 0
@@ -29,11 +31,21 @@ def f(x):
         'z': 2,
     }[x]
 
+def g(x):
+	return ['x','y','z'][x]
 
-# Inputs
-num_of_bins = int(input("How many bins? "))
-joint_index = int(input("Which joint? ")) - 1
-dimension = f(input("x, y, or z? (enter in lowercase) "))
+def inputs():
+	num_of_bins = int(input("How many bins? "))
+	joint_index = int(input("Which joint? ")) - 1
+	num_of_dimensions = int(input("How many task space dimensions do you wish to plot? "))
+	dimensions = list()
+	for i in range(num_of_dimensions):
+		dimensions.append(f(input("x, y, or z? (enter in lowercase) ")))
+	return num_of_bins, joint_index, dimensions
+
+
+
+num_of_bins, joint_index, dimensions = inputs()
 
 # Loads data from yaml
 stream = file('data.yaml', 'r')
@@ -42,46 +54,65 @@ data = yaml.load(stream, Loader=Loader)
 
 while True:
 
-	# Variable declaration
+	# Vars
 	min_DOF_value = data["DOF_limits"][0][joint_index]
 	max_DOF_value = data["DOF_limits"][1][joint_index]
-
 	increment = (max_DOF_value - min_DOF_value) / num_of_bins
 	ranges = [increment*(i+1) + min_DOF_value for i in range(num_of_bins)]
-	value = [0 for i in range(num_of_bins)]
+	value = list()
+	for j in range(len(dimensions)):
+		value.append([0 for i in range(num_of_bins)])
 	count = [0 for i in range(num_of_bins)]
 
 
+	# Sorts data
 	i = 0
 	for DOFs in data["DOFs"]:
 		joint_value = DOFs[joint_index]
 		bin_index = modifiedBinarySearch(ranges, joint_value)
-		value[bin_index] += data["Transforms"][i][dimension][3]
+		for j in range(len(dimensions)):
+			value[j][bin_index] += data["Transforms"][i][dimensions[j]][3]
 		count[bin_index] += 1	
 		i += 1
 
 
+	# Creates average_value
 	average_value = list()
+	for num in dimensions:
+		average_value.append(list())
 	for i in range(num_of_bins):
 		if count[i] != 0:
-			average_value.append(value[i] / count[i])
+			for j in range(len(dimensions)):
+				average_value[j].append(value[j][i] / count[i])
 
-	y = np.array(average_value)
-	x = np.array(ranges)
 
-	slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
-	predict_y = intercept + slope * x
-	print r_value
+	# Displays data
+	dep_vars = np.array(average_value)
+	ind_var = np.array(ranges)
 
-	plt.plot(x, y, 'o')
-	plt.plot(x, predict_y, 'k-')
-	plt.show()
+	if(len(dep_vars) == 1):
+		slope, intercept, r_value, p_value, std_err = stats.linregress(ind_var,dep_vars[0])
+		predict_y = intercept + slope * ind_var
 
+		plt.xlabel("Joint Space")
+		plt.ylabel("Task Space: {0}".format(g(dimensions[0])))
+
+		plt.plot(ind_var, dep_vars[0], 'o')
+		plt.plot(ind_var, predict_y, 'k-')
+		plt.show()
+
+	elif(len(dep_vars) == 2):
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+
+		plt.xlabel("Joint Space")
+		plt.ylabel("Task Space: {0}".format(g(dimensions[0])))
+		ax.set_zlabel("Task Space: {0}".format(g(dimensions[1])))
+
+		ax.scatter(ind_var, dep_vars[0], dep_vars[1])
+		plt.show()
 
 	if not input("Continue? (1/0): "):
 		break
 
-	# Inputs
-	num_of_bins = int(input("How many bins? "))
-	joint_index = int(input("Which joint? ")) - 1
-	dimension = f(input("x, y, or z? (enter in lowercase) "))
+	num_of_bins, joint_index, dimensions = inputs()
