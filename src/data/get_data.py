@@ -1,8 +1,8 @@
 from random import random
-from time import gmtime, strftime
 from math import sqrt
 import herbpy
 import yaml
+from yaml import CLoader as Loader, CDumper as Dumper
 
 
 def random_dof_values(lowerBound, upperBound):
@@ -25,6 +25,7 @@ for i in range(len(limits)):
 
 data = {"DOF_limits": limits, "DOFs": [old_dof_values], "Transforms": [pos]}
 
+
 for i in range(iterations):
 	new_dof_values = [random_dof_values(limits[0][j],limits[1][j]) for j in range(7)]			# Generates the new random position within the range of the min and max
 	
@@ -39,4 +40,4 @@ for i in range(iterations):
 
 
 with file('data.yaml', 'w') as stream:
-	yaml.dump(data, stream)
+	dump = yaml.dump(data, stream, encoding='utf-8', default_flow_style=False, Dumper=Dumper)

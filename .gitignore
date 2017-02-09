@@ -39,3 +39,4 @@ Thumbs.db
 # Data files #
 ##############
 *.txt
+*.yaml
