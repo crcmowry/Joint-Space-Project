@@ -105,10 +105,16 @@ while True:
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
 
+		predicts = list()
+		for i in range(2):
+			slope, intercept, r_value, p_value, std_err = stats.linregress(ind_var,dep_vars[i])
+			predicts.append(intercept + slope * ind_var)
+
 		plt.xlabel("Joint Space")
 		plt.ylabel("Task Space: {0}".format(g(dimensions[0])))
 		ax.set_zlabel("Task Space: {0}".format(g(dimensions[1])))
 
+		ax.plot(ind_var, predicts[0], predicts[1])
 		ax.scatter(ind_var, dep_vars[0], dep_vars[1])
 		plt.show()
 
