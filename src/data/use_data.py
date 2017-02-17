@@ -3,8 +3,11 @@ from yaml import CLoader as Loader, CDumper as Dumper
 
 import numpy as np
 from scipy import stats
+import numpy as np
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+
 
 
 def modifiedBinarySearch(alist, item):
@@ -24,15 +27,7 @@ def modifiedBinarySearch(alist, item):
 
 	return midpoint
 
-def f(x):
-    return {
-    	'x': 0,
-        'y': 1,
-        'z': 2,
-    }[x]
 
-def g(x):
-	return ['x','y','z'][x]
 
 def inputs():
 	num_of_bins = int(input("How many bins? "))
@@ -40,12 +35,88 @@ def inputs():
 	num_of_dimensions = int(input("How many task space dimensions do you wish to plot? "))
 	dimensions = list()
 	for i in range(num_of_dimensions):
-		dimensions.append(f(input("x, y, or z? (enter in lowercase) ")))
-	return num_of_bins, joint_index, dimensions
+		dimensions.append({'x': 0,'y': 1,'z': 2}[input("x, y, or z? (enter in lowercase) ")])
+	regression_type = {'s':0,'l':1}[input("What type of regression (s/l)? ")]
+	return num_of_bins, joint_index, dimensions, regression_type
 
 
 
-num_of_bins, joint_index, dimensions = inputs()
+def linear_regression(x,y_list):
+	if(len(y_list) == 1):
+		y = y_list[0]
+
+		slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
+		predict_y = intercept + slope * x
+
+		plt.xlabel("Joint Space")
+		plt.ylabel("Task Space: {0}".format(['x','y','z'][dimensions[0]]))
+
+		plt.plot(x, y, 'o')
+		plt.plot(x, predict_y, 'k-')
+		plt.show()
+
+	elif(len(y_list) == 2):
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+
+		predicts = list()
+		for i in range(2):
+			slope, intercept, r_value, p_value, std_err = stats.linregress(x,y_list[i])
+			predicts.append(intercept + slope * x)
+
+		plt.xlabel("Joint Space")
+		plt.ylabel("Task Space: {0}".format(['x','y','z'][dimensions[0]]))
+		ax.set_zlabel("Task Space: {0}".format(['x','y','z'][dimensions[1]]))
+
+		ax.plot(x, predicts[0], predicts[1])
+		ax.scatter(x, y_list[0], y_list[1])
+		plt.show()
+
+
+
+def display_sinusoidal_regression(x,y_list):
+	if(len(y_list) == 1):
+		plt.plot(x, y_list[0], '.')
+		plt.plot(x, sinusoidal_regression(x,y_list[0]))
+		plt.show()
+	elif(len(y_list) == 2):
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+
+		plt.xlabel("Joint Space")
+		plt.ylabel("Task Space: {0}".format(['x','y','z'][dimensions[0]]))
+		ax.set_zlabel("Task Space: {0}".format(['x','y','z'][dimensions[1]]))
+
+		ax.plot(x,sinusoidal_regression(x,y_list[0]), sinusoidal_regression(x,y_list[1]))
+		ax.scatter(x, y_list[0], y_list[1])
+		plt.show()
+
+
+
+def sinusoidal_regression(x,y):
+	guess_freq = 1
+	guess_amplitude = np.std(y)/(2**0.5)
+	guess_phase = 0
+	guess_offset = np.mean(y)
+
+	p0=[guess_freq, guess_amplitude,
+	    guess_phase, guess_offset]
+
+	# create the function we want to fit
+	def my_sin(x, freq, amplitude, phase, offset):
+	    return np.sin(x * freq + phase) * amplitude + offset
+
+	# now do the fit
+	fit = curve_fit(my_sin, x, y)
+
+
+	# recreate the fitted curve using the optimized parameters
+	data_fit = my_sin(x, *fit[0])
+	return data_fit
+
+
+
+num_of_bins, joint_index, dimensions, regression_type = inputs()
 
 # Loads data from yaml
 stream = file('data.yaml', 'r')
@@ -54,7 +125,7 @@ data = yaml.load(stream, Loader=Loader)
 
 while True:
 
-	# Vars
+	# Variable Declaration
 	min_DOF_value = data["DOF_limits"][0][joint_index]
 	max_DOF_value = data["DOF_limits"][1][joint_index]
 	increment = (max_DOF_value - min_DOF_value) / num_of_bins
@@ -89,36 +160,14 @@ while True:
 	# Displays data
 	dep_vars = np.array(average_value)
 	ind_var = np.array(ranges)
+	if(regression_type == 0):
+		display_sinusoidal_regression(ind_var,dep_vars)
+	elif(regression_type == 1):
+		linear_regression(ind_var,dep_vars)
 
-	if(len(dep_vars) == 1):
-		slope, intercept, r_value, p_value, std_err = stats.linregress(ind_var,dep_vars[0])
-		predict_y = intercept + slope * ind_var
 
-		plt.xlabel("Joint Space")
-		plt.ylabel("Task Space: {0}".format(g(dimensions[0])))
-
-		plt.plot(ind_var, dep_vars[0], 'o')
-		plt.plot(ind_var, predict_y, 'k-')
-		plt.show()
-
-	elif(len(dep_vars) == 2):
-		fig = plt.figure()
-		ax = fig.add_subplot(111, projection='3d')
-
-		predicts = list()
-		for i in range(2):
-			slope, intercept, r_value, p_value, std_err = stats.linregress(ind_var,dep_vars[i])
-			predicts.append(intercept + slope * ind_var)
-
-		plt.xlabel("Joint Space")
-		plt.ylabel("Task Space: {0}".format(g(dimensions[0])))
-		ax.set_zlabel("Task Space: {0}".format(g(dimensions[1])))
-
-		ax.plot(ind_var, predicts[0], predicts[1])
-		ax.scatter(ind_var, dep_vars[0], dep_vars[1])
-		plt.show()
 
 	if not input("Continue? (1/0): "):
 		break
 
-	num_of_bins, joint_index, dimensions = inputs()
+	num_of_bins, joint_index, dimensions, regression_type = inputs()
