@@ -30,6 +30,8 @@ def modifiedBinarySearch(alist, item):
 
 
 def inputs():
+	return 100, 1, [0], 1
+
 	num_of_bins = int(input("How many bins? "))
 	joint_index = int(input("Which joint? ")) - 1
 	num_of_dimensions = int(input("How many task space dimensions do you wish to plot? "))

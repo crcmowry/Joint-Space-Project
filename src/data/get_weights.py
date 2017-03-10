@@ -1,4 +1,5 @@
 import math
+import scipy.integrate as integrate
 
 weights = list()
 
@@ -9,23 +10,19 @@ def get_weights(lengths,angles):
 	else:
 		l2 = lengths.pop()
 		l1 = lengths.pop()
-		a2 = angles.pop()
-		a1 = angles.pop()
+		a = angles.pop()
 
-		dx = l1 * math.sin(a1) - l2 * math.sin(a1 + a2)
-		dy = l1 * math.cos(a1) - l2 * math.cos(a1 + a2)
-
-		d = math.sqrt(dx**2 + dy**2)
-		a = math.atan(dy/dx)
-		
-		print a
+		f = lambda x: math.sqrt(l1**2 + l2**2 - 2*l1*l2*math.cos(x))
+		average = abs(integrate.quad(f,a[0],a[1])[0]/(a[1]-a[0]))
 
 		weights.append(l2)
 
-		lengths.append(d)
-		angles.append(a)
+		lengths.append(average)
 		return get_weights(lengths,angles)
 
-lengths = input("Enter joint lengths as a list: ")
-angles = input("Enter joint angles as a list: ")
+#lengths = input("Enter joint lengths as a list: ")
+#angles = input("Enter joint angles as a list: ")
+lengths = [100,200,10,1]
+angles = [[0,3*math.pi/2],[0,math.pi],[math.pi/2,math.pi*3/2]]
+
 print list(reversed(get_weights(lengths,angles)))
