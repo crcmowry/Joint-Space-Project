@@ -30,7 +30,7 @@ def modifiedBinarySearch(alist, item):
 
 
 def inputs():
-	return 100, 1, [0], 1
+	return 100, 0, [0,2], 0
 
 	num_of_bins = int(input("How many bins? "))
 	joint_index = int(input("Which joint? ")) - 1
@@ -44,54 +44,65 @@ def inputs():
 
 
 def linear_regression(x,y_list):
-	if(len(y_list) == 1):
-		y = y_list[0]
+	try:
 
-		slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
-		predict_y = intercept + slope * x
+		if(len(y_list) == 1):
+			y = y_list[0]
 
-		plt.xlabel("Joint Space")
-		plt.ylabel("Task Space: {0}".format(['x','y','z'][dimensions[0]]))
+			slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
+			predict_y = intercept + slope * x
 
-		plt.plot(x, y, 'o')
-		plt.plot(x, predict_y, 'k-')
-		plt.show()
+			plt.xlabel("Joint Space")
+			plt.ylabel("Task Space: {0}".format(['x','y','z'][dimensions[0]]))
 
-	elif(len(y_list) == 2):
-		fig = plt.figure()
-		ax = fig.add_subplot(111, projection='3d')
+			plt.plot(x, y, 'o')
+			plt.plot(x, predict_y, 'k-')
+			plt.show()
 
-		predicts = list()
-		for i in range(2):
-			slope, intercept, r_value, p_value, std_err = stats.linregress(x,y_list[i])
-			predicts.append(intercept + slope * x)
 
-		plt.xlabel("Joint Space")
-		plt.ylabel("Task Space: {0}".format(['x','y','z'][dimensions[0]]))
-		ax.set_zlabel("Task Space: {0}".format(['x','y','z'][dimensions[1]]))
 
-		ax.plot(x, predicts[0], predicts[1])
-		ax.scatter(x, y_list[0], y_list[1])
-		plt.show()
+		elif(len(y_list) == 2):
+			fig = plt.figure()
+			ax = fig.add_subplot(111, projection='3d')
+
+			predicts = list()
+			for i in range(2):
+				slope, intercept, r_value, p_value, std_err = stats.linregress(x,y_list[i])
+				predicts.append(intercept + slope * x)
+
+			plt.xlabel("Joint Space")
+			plt.ylabel("Task Space: {0}".format(['x','y','z'][dimensions[0]]))
+			ax.set_zlabel("Task Space: {0}".format(['x','y','z'][dimensions[1]]))
+
+			ax.plot(x, predicts[0], predicts[1])
+			ax.scatter(x, y_list[0], y_list[1])
+			plt.show()
+
+	except ValueError:
+		print("Not all bins are full, Vikram.")
 
 
 
 def display_sinusoidal_regression(x,y_list):
-	if(len(y_list) == 1):
-		plt.plot(x, y_list[0], '.')
-		plt.plot(x, sinusoidal_regression(x,y_list[0]))
-		plt.show()
-	elif(len(y_list) == 2):
-		fig = plt.figure()
-		ax = fig.add_subplot(111, projection='3d')
+	try:
+		if(len(y_list) == 1):
+			plt.plot(x, y_list[0], '.')
+			plt.plot(x, sinusoidal_regression(x,y_list[0]))
+			plt.show()
+		elif(len(y_list) == 2):
+			fig = plt.figure()
+			ax = fig.add_subplot(111, projection='3d')
 
-		plt.xlabel("Joint Space")
-		plt.ylabel("Task Space: {0}".format(['x','y','z'][dimensions[0]]))
-		ax.set_zlabel("Task Space: {0}".format(['x','y','z'][dimensions[1]]))
+			plt.xlabel("Joint Space")
+			plt.ylabel("Task Space: {0}".format(['x','y','z'][dimensions[0]]))
+			ax.set_zlabel("Task Space: {0}".format(['x','y','z'][dimensions[1]]))
 
-		ax.plot(x,sinusoidal_regression(x,y_list[0]), sinusoidal_regression(x,y_list[1]))
-		ax.scatter(x, y_list[0], y_list[1])
-		plt.show()
+			ax.plot(x,sinusoidal_regression(x,y_list[0]), sinusoidal_regression(x,y_list[1]))
+			ax.scatter(x, y_list[0], y_list[1])
+			plt.show()
+
+	except ValueError:
+		print("Not all bins are full, Vikram.")
 
 
 

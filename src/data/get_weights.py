@@ -1,5 +1,6 @@
 import math
 import scipy.integrate as integrate
+import pr2py
 
 weights = list()
 
@@ -20,9 +21,31 @@ def get_weights(lengths,angles):
 		lengths.append(average)
 		return get_weights(lengths,angles)
 
+
 #lengths = input("Enter joint lengths as a list: ")
 #angles = input("Enter joint angles as a list: ")
-lengths = [100,200,10,1]
-angles = [[0,3*math.pi/2],[0,math.pi],[math.pi/2,math.pi*3/2]]
+
+env, robot = pr2py.initialize(sim = True)
+
+
+"""
+def get_length():
+	return 0
+for index in robot.right_arm.GetArmJoints():
+	print (robot.GetJoints()[index])
+"""
+
+
+"""
+Upper Arm :: 400 mm
+Forearm :: 321 mm
+Wrist to Gripper Surface :: 120 to 200 mm
+"""
+
+
+lengths = [400,321,120]
+angles = list()
+for index in robot.right_arm.GetArmJoints():
+	angles.append([robot.GetDOFLimits()[0][index],robot.GetDOFLimits()[1][index]])
 
 print list(reversed(get_weights(lengths,angles)))
