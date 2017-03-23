@@ -11,6 +11,16 @@ from yaml import CLoader as Loader, CDumper as Dumper
 def random_dof_value(lowerBound, upperBound):
 		return random() * (upperBound - lowerBound) + lowerBound
 
+def get_transforms():
+	links = ["r_shoulder_pan_link", "r_shoulder_lift_link", "r_upper_arm_roll_link", "r_elbow_flex_link", "r_forearm_roll_link", "r_wrist_flex_link", "r_wrist_roll_link",]
+	link_transforms = list()
+	for our_link in links:
+		for k in range(len(robot.GetLinks())):
+			if robot.GetLink(our_link) == robot.GetLinks()[k]:
+				link_transforms.append(robot.GetLinkTransformations()[k].tolist())
+	link_transforms.append(robot.right_arm.GetEndEffectorTransform().tolist())
+	return link_transforms
+
 
 iterations = input("How much data? ")
 
@@ -21,18 +31,18 @@ robot.right_arm.SetActive()
 
 
 limits = list(robot.GetActiveDOFLimits())
-pos = robot.right_arm.GetEndEffectorTransform().tolist() 												# This should be the starting position of the end effector.
 dof_values = robot.right_arm.GetDOFValues().tolist() 												# The DOF values at the starting position. Possibly all 0s.
 
 for i in range(len(limits)):
 	limits[i] = limits[i].tolist()
 
-data = {"DOF_limits": limits, "DOFs": [dof_values], "Transforms": [pos]}
+data = {"DOF_limits": limits, "DOFs": [dof_values], "Transforms": [get_transforms()]}
+
 
 
 for i in range(iterations):
 	#dof_values = [random_dof_value(limits[0][j],limits[1][j]) for j in range(7)]			# Generates the new random position within the range of the min and max
-	
+	print i
 	dof_values_copy = list()
 	for dof_value in dof_values:
 		dof_values_copy.append(dof_value)
@@ -45,12 +55,20 @@ for i in range(iterations):
 			dof_values.append(random_dof_value(limits[0][j],limits[1][j]))
 
 
+	"""for j in range(3):
+		index = j * 2 + 1
+		dof_values[index] = random_dof_value(limits[0][index],limits[1][index])"""
+
+
 	robot.right_arm.SetDOFValues(dof_values)
 
-	pos = robot.right_arm.GetEndEffectorTransform().tolist()												# Gets the pos at the new_dof_values.
+
+	
 
 	data["DOFs"].append(dof_values)
-	data["Transforms"].append(pos)
+	data["Transforms"].append(get_transforms())
+
+	
 
 
 with file('data.yaml', 'w') as stream:

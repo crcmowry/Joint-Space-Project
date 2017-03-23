@@ -30,7 +30,7 @@ def modifiedBinarySearch(alist, item):
 
 
 def inputs():
-	return 100, 0, [0,2], 0
+	#return 100, 1, [0,2], 1
 
 	num_of_bins = int(input("How many bins? "))
 	joint_index = int(input("Which joint? ")) - 1
@@ -108,9 +108,9 @@ def display_sinusoidal_regression(x,y_list):
 
 def sinusoidal_regression(x,y):
 	guess_freq = 1
-	guess_amplitude = np.std(y)/(2**0.5)
-	guess_phase = 0
-	guess_offset = np.mean(y)
+	guess_amplitude = 1
+	guess_phase = 1
+	guess_offset = 1
 
 	p0=[guess_freq, guess_amplitude,
 	    guess_phase, guess_offset]
@@ -155,7 +155,7 @@ while True:
 		joint_value = DOFs[joint_index]
 		bin_index = modifiedBinarySearch(ranges, joint_value)
 		for j in range(len(dimensions)):
-			value[j][bin_index] += data["Transforms"][i][dimensions[j]][3]
+			value[j][bin_index] += data["Transforms"][i][7][dimensions[j]][3]
 		count[bin_index] += 1	
 		i += 1
 
@@ -165,9 +165,11 @@ while True:
 	for num in dimensions:
 		average_value.append(list())
 	for i in range(num_of_bins):
-		if count[i] != 0:
-			for j in range(len(dimensions)):
+		for j in range(len(dimensions)):
+			if count[i] != 0:
 				average_value[j].append(value[j][i] / count[i])
+			else:
+				average_value[j].append(0)
 
 
 	# Displays data
